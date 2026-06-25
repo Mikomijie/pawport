@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  hashedPassword String
+  phone          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  cats           Cat[]
+  sessions       Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Cat {
+  id               String       @id @default(cuid())
+  name             String
+  breed            String?
+  color            String?
+  age              Int?
+  photoUrl         String?
+  microchipId      String?
+  isLost           Boolean      @default(false)
+  lostAt           DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  ownerId          String
+  owner            User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vaccinations     Vaccination[]
+  sightings        Sighting[]
+
+  @@index([ownerId])
+}
+
+model Vaccination {
+  id        String   @id @default(cuid())
+  name      String
+  date      DateTime
+  nextDue   DateTime?
+  vetName   String?
+  catId     String
+  cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  @@index([catId])
+}
+
+model Sighting {
+  id        String   @id @default(cuid())
+  catId     String
+  latitude  Float
+  longitude Float
+  message   String?
+  createdAt DateTime @default(now())
+  cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  @@index([catId])
+}
