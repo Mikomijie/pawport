@@ -30,22 +30,32 @@ model Session {
 }
 
 model Cat {
-  id               String       @id @default(cuid())
-  pin              String       @unique
-  name             String
-  breed            String?
-  color            String?
-  age              Int?
-  photoUrl         String?
-  microchipId      String?
-  isLost           Boolean      @default(false)
-  lostAt           DateTime?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  ownerId          String
-  owner            User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  vaccinations     Vaccination[]
-  sightings        Sighting[]
+  id                    String           @id @default(cuid())
+  pin                   String           @unique
+  name                  String
+  breed                 String?
+  color                 String?
+  age                   Int?
+  gender                String?
+  weight                Float?
+  photoUrl              String?
+  microchipId           String?
+  allergies             String?
+  dietaryRestrictions   String?
+  medicalHistory        String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  isLost                Boolean          @default(false)
+  lostAt                DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  ownerId               String
+  owner                 User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  vaccinations          Vaccination[]
+  sightings             Sighting[]
+  escalations           Escalation[]
+  careLogs              CareLog[]
+  privacySettings       PrivacySettings?
 
   @@index([ownerId])
   @@index([pin])
@@ -73,4 +83,40 @@ model Sighting {
   cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
 
   @@index([catId])
+}
+
+model Escalation {
+  id        String   @id @default(cuid())
+  catId     String
+  level     Int
+  message   String
+  createdAt DateTime @default(now())
+  cat       Cat      @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  @@index([catId])
+}
+
+model CareLog {
+  id          String    @id @default(cuid())
+  catId       String
+  type        String
+  notes       String?
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  cat         Cat       @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  @@index([catId])
+  @@index([catId, type])
+}
+
+model PrivacySettings {
+  id                  String  @id @default(cuid())
+  catId               String  @unique
+  showPhone           Boolean @default(true)
+  showAddress         Boolean @default(true)
+  showFeedingSchedule Boolean @default(true)
+  showLocation        Boolean @default(true)
+  showGPSHistory      Boolean @default(true)
+  cat                 Cat     @relation(fields: [catId], references: [id], onDelete: Cascade)
 }

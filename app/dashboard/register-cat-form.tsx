@@ -61,7 +61,7 @@ export function RegisterCatForm() {
   return (
     <div className="mb-6 rounded-lg bg-white shadow-md p-6">
       <h3 className="text-lg font-semibold mb-4">Register New Cat</h3>
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <p className="text-sm text-red-600" role="alert">{error}</p>
         )}
@@ -79,9 +79,7 @@ export function RegisterCatForm() {
             )}
           </div>
           <div>
-            <label htmlFor="cat-photo" className="block text-sm font-medium text-gray-700">
-              Cat Photo
-            </label>
+            <label htmlFor="cat-photo" className="block text-sm font-medium text-gray-700">Cat Photo</label>
             <input
               ref={fileRef}
               id="cat-photo"
@@ -95,29 +93,79 @@ export function RegisterCatForm() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <label htmlFor="cat-name" className="block text-sm font-medium text-gray-700">Name *</label>
-            <input id="cat-name" name="name" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        {/* Basic Info */}
+        <fieldset>
+          <legend className="text-sm font-medium text-gray-700 mb-2">Basic Information</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="cat-name" className="block text-xs font-medium text-gray-600">Name *</label>
+              <input id="cat-name" name="name" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-breed" className="block text-xs font-medium text-gray-600">Breed</label>
+              <input id="cat-breed" name="breed" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-gender" className="block text-xs font-medium text-gray-600">Gender</label>
+              <select id="cat-gender" name="gender" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <option value="">Select...</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Unknown">Unknown</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="cat-age" className="block text-xs font-medium text-gray-600">Age (years)</label>
+              <input id="cat-age" name="age" type="number" min="0" max="30" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-weight" className="block text-xs font-medium text-gray-600">Weight (kg)</label>
+              <input id="cat-weight" name="weight" type="number" step="0.1" min="0" max="30" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-color" className="block text-xs font-medium text-gray-600">Color</label>
+              <input id="cat-color" name="color" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
           </div>
-          <div>
-            <label htmlFor="cat-breed" className="block text-sm font-medium text-gray-700">Breed</label>
-            <input id="cat-breed" name="breed" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label htmlFor="cat-color" className="block text-sm font-medium text-gray-700">Color</label>
-            <input id="cat-color" name="color" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label htmlFor="cat-age" className="block text-sm font-medium text-gray-700">Age (years)</label>
-            <input id="cat-age" name="age" type="number" min="0" max="30" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-          </div>
-        </div>
+        </fieldset>
 
-        <div>
-          <label htmlFor="cat-microchip" className="block text-sm font-medium text-gray-700">Microchip ID</label>
-          <input id="cat-microchip" name="microchipId" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
+        {/* Health Info */}
+        <fieldset>
+          <legend className="text-sm font-medium text-gray-700 mb-2">Health Information</legend>
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="cat-allergies" className="block text-xs font-medium text-gray-600">Allergies</label>
+              <input id="cat-allergies" name="allergies" placeholder="e.g. chicken, certain medications" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-dietary" className="block text-xs font-medium text-gray-600">Dietary Restrictions</label>
+              <input id="cat-dietary" name="dietaryRestrictions" placeholder="e.g. grain-free, wet food only" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-medical" className="block text-xs font-medium text-gray-600">Medical History</label>
+              <textarea id="cat-medical" name="medicalHistory" rows={2} placeholder="e.g. spayed 2023, dental cleaning 2024" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-microchip" className="block text-xs font-medium text-gray-600">Microchip ID</label>
+              <input id="cat-microchip" name="microchipId" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* Emergency Contact */}
+        <fieldset>
+          <legend className="text-sm font-medium text-gray-700 mb-2">Emergency Contact</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="cat-emergency-name" className="block text-xs font-medium text-gray-600">Contact Name</label>
+              <input id="cat-emergency-name" name="emergencyContactName" placeholder="Backup contact person" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label htmlFor="cat-emergency-phone" className="block text-xs font-medium text-gray-600">Contact Phone</label>
+              <input id="cat-emergency-phone" name="emergencyContactPhone" type="tel" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+          </div>
+        </fieldset>
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={loading} className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white font-medium hover:bg-indigo-700 disabled:opacity-50">

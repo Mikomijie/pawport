@@ -14,7 +14,11 @@ export async function GET() {
 
   const cats = await db.cat.findMany({
     where: { ownerId: session.userId },
-    include: { vaccinations: true, sightings: { orderBy: { createdAt: "desc" }, take: 5 } },
+    include: {
+      vaccinations: true,
+      sightings: { orderBy: { createdAt: "desc" }, take: 5 },
+      careLogs: { orderBy: { createdAt: "desc" }, take: 5 },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -34,7 +38,14 @@ export async function POST(req: NextRequest) {
     const breed = formData.get("breed") as string | null;
     const color = formData.get("color") as string | null;
     const age = formData.get("age") as string | null;
+    const gender = formData.get("gender") as string | null;
+    const weight = formData.get("weight") as string | null;
     const microchipId = formData.get("microchipId") as string | null;
+    const allergies = formData.get("allergies") as string | null;
+    const dietaryRestrictions = formData.get("dietaryRestrictions") as string | null;
+    const medicalHistory = formData.get("medicalHistory") as string | null;
+    const emergencyContactName = formData.get("emergencyContactName") as string | null;
+    const emergencyContactPhone = formData.get("emergencyContactPhone") as string | null;
     const photo = formData.get("photo") as File | null;
 
     if (!name) {
@@ -44,18 +55,14 @@ export async function POST(req: NextRequest) {
     // Handle photo upload
     let photoUrl: string | null = null;
     if (photo && photo.size > 0) {
-      // Validate file type
       const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(photo.type)) {
         return NextResponse.json({ error: "Invalid image type. Use JPEG, PNG, WebP, or GIF." }, { status: 400 });
       }
-
-      // Validate file size (max 5MB)
       if (photo.size > 5 * 1024 * 1024) {
         return NextResponse.json({ error: "Image must be under 5MB" }, { status: 400 });
       }
 
-      // Save file
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
       await mkdir(uploadsDir, { recursive: true });
 
@@ -69,7 +76,6 @@ export async function POST(req: NextRequest) {
       photoUrl = `/uploads/${filename}`;
     }
 
-    // Generate unique 6-digit PIN
     const pin = await generateUniquePin();
 
     const cat = await db.cat.create({
@@ -79,10 +85,22 @@ export async function POST(req: NextRequest) {
         breed: breed ? sanitizeInput(breed) : null,
         color: color ? sanitizeInput(color) : null,
         age: age ? parseInt(age, 10) : null,
+        gender: gender || null,
+        weight: weight ? parseFloat(weight) : null,
         microchipId: microchipId ? sanitizeInput(microchipId) : null,
+        allergies: allergies ? sanitizeInput(allergies) : null,
+        dietaryRestrictions: dietaryRestrictions ? sanitizeInput(dietaryRestrictions) : null,
+        medicalHistory: medicalHistory ? sanitizeInput(medicalHistory) : null,
+        emergencyContactName: emergencyContactName ? sanitizeInput(emergencyContactName) : null,
+        emergencyContactPhone: emergencyContactPhone ? sanitizeInput(emergencyContactPhone) : null,
         photoUrl,
         ownerId: session.userId,
       },
+    });
+
+    // Create default privacy settings
+    await db.privacySettings.create({
+      data: { catId: cat.id },
     });
 
     return NextResponse.json(cat, { status: 201 });

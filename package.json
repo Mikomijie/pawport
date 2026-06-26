@@ -9,13 +9,18 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "temporal:worker": "ts-node --project tsconfig.worker.json temporal/worker.ts"
   },
   "dependencies": {
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "@prisma/client": "^6.9.0",
+    "@temporalio/activity": "^1.11.7",
+    "@temporalio/client": "^1.11.7",
+    "@temporalio/worker": "^1.11.7",
+    "@temporalio/workflow": "^1.11.7",
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
@@ -28,6 +33,7 @@
     "eslint-config-next": "16.2.9",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

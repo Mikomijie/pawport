@@ -12,6 +12,8 @@ export default async function DashboardPage() {
     include: {
       sightings: { orderBy: { createdAt: "desc" }, take: 3 },
       vaccinations: true,
+      escalations: { orderBy: { createdAt: "desc" }, take: 5 },
+      careLogs: { orderBy: { createdAt: "desc" }, take: 5 },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -33,17 +35,15 @@ export default async function DashboardPage() {
           <h2 className="text-2xl font-bold">Your Cats</h2>
         </div>
 
-        {/* Register new cat */}
         <RegisterCatForm />
 
-        {/* Cat list */}
         {cats.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p className="text-4xl mb-2">🐱</p>
             <p>No cats registered yet. Add your first cat above!</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
             {cats.map((cat) => (
               <CatCard key={cat.id} cat={cat} />
             ))}
