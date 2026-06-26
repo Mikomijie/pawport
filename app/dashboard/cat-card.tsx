@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { QRCode } from "./qr-code";
+import { PrivacySettings } from "./privacy-settings";
 
 interface CareLog {
   id: string;
@@ -348,6 +349,11 @@ export function CatCard({ cat }: { cat: Cat }) {
           ⚡ Temporal workflow active — escalating alerts every 24 hours
         </p>
       )}
+
+      {/* Privacy Settings */}
+      <div className="mt-3">
+        <PrivacySettings catId={cat.id} />
+      </div>
     </div>
   );
 }
