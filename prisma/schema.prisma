@@ -31,6 +31,7 @@ model Session {
 
 model Cat {
   id               String       @id @default(cuid())
+  pin              String       @unique
   name             String
   breed            String?
   color            String?
@@ -47,6 +48,7 @@ model Cat {
   sightings        Sighting[]
 
   @@index([ownerId])
+  @@index([pin])
 }
 
 model Vaccination {

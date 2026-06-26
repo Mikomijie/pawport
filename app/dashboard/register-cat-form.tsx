@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export function RegisterCatForm() {
@@ -8,6 +8,21 @@ export function RegisterCatForm() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image must be under 5MB");
+        return;
+      }
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setPreview(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -15,20 +30,15 @@ export function RegisterCatForm() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
+
     const res = await fetch("/api/cats", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: formData.get("name"),
-        breed: formData.get("breed"),
-        color: formData.get("color"),
-        age: formData.get("age"),
-        microchipId: formData.get("microchipId"),
-      }),
+      body: formData,
     });
 
     if (res.ok) {
       setOpen(false);
+      setPreview(null);
       router.refresh();
     } else {
       const data = await res.json();
@@ -55,6 +65,35 @@ export function RegisterCatForm() {
         {error && (
           <p className="text-sm text-red-600" role="alert">{error}</p>
         )}
+
+        {/* Photo upload */}
+        <div className="flex items-center gap-4">
+          <div
+            className="h-20 w-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-colors"
+            onClick={() => fileRef.current?.click()}
+          >
+            {preview ? (
+              <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+            ) : (
+              <span className="text-2xl">📷</span>
+            )}
+          </div>
+          <div>
+            <label htmlFor="cat-photo" className="block text-sm font-medium text-gray-700">
+              Cat Photo
+            </label>
+            <input
+              ref={fileRef}
+              id="cat-photo"
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handlePhotoChange}
+              className="mt-1 text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            />
+            <p className="mt-0.5 text-xs text-gray-400">Max 5MB. JPEG, PNG, WebP, or GIF.</p>
+          </div>
+        </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -84,7 +123,7 @@ export function RegisterCatForm() {
           <button type="submit" disabled={loading} className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white font-medium hover:bg-indigo-700 disabled:opacity-50">
             {loading ? "Saving..." : "Register Cat"}
           </button>
-          <button type="button" onClick={() => setOpen(false)} className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <button type="button" onClick={() => { setOpen(false); setPreview(null); }} className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
             Cancel
           </button>
         </div>

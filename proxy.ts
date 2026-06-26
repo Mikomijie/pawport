@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Middleware to protect dashboard routes
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionId = request.cookies.get("session_id")?.value;
 
   // Protect dashboard routes

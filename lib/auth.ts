@@ -42,11 +42,6 @@ export async function getSession() {
   });
 
   if (!session || session.expiresAt < new Date()) {
-    // Clean up expired session
-    if (session) {
-      await db.session.delete({ where: { id: sessionId } });
-    }
-    cookieStore.delete("session_id");
     return null;
   }
 
