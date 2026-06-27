@@ -15,6 +15,17 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
+function timeAgo(date: Date): string {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? "s" : ""} ago`;
+}
+
 export default async function CatProfilePage({ params }: Props) {
   const { id } = await params;
 
@@ -31,200 +42,160 @@ export default async function CatProfilePage({ params }: Props) {
   if (!cat) notFound();
 
   const privacy = cat.privacySettings;
-
-  // Get last feeding and water times
   const lastFed = cat.careLogs.find((l) => l.type === "FEEDING");
   const lastWater = cat.careLogs.find((l) => l.type === "WATER");
-  const lastMed = cat.careLogs.find((l) => l.type === "MEDICATION");
-
-  function timeAgo(date: Date): string {
-    const diff = Date.now() - date.getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins} min ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? "s" : ""} ago`;
-  }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-gradient-to-b from-indigo-50 to-gray-50 px-4 py-6">
       <div className="mx-auto max-w-md">
+
         {/* Lost banner */}
         {cat.isLost && (
-          <div className="mb-4 rounded-lg bg-red-100 border border-red-300 p-4 text-center animate-pulse">
-            <p className="text-lg font-bold text-red-800">🚨 This cat is LOST</p>
-            <p className="text-sm text-red-700 mt-1">
-              If you found this cat, please use the button below or contact the owner directly.
+          <div className="mb-4 rounded-2xl bg-red-500 p-5 text-center text-white shadow-lg animate-pulse">
+            <p className="text-2xl font-bold">🚨 LOST CAT</p>
+            <p className="text-sm mt-1 text-red-100">
+              Please help! If you&apos;ve found this cat, contact the owner below or tap &quot;I Found This Cat&quot;.
             </p>
           </div>
         )}
 
-        {/* Cat info card */}
-        <div className="rounded-lg bg-white shadow-md p-6">
-          <div className="text-center mb-4">
+        {/* Cat Profile Card */}
+        <div className="rounded-2xl bg-white shadow-lg overflow-hidden">
+          {/* Photo header */}
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-center">
             {cat.photoUrl ? (
-              <img src={cat.photoUrl} alt={cat.name} className="mx-auto h-24 w-24 rounded-full object-cover border-4 border-indigo-100" />
+              <img
+                src={cat.photoUrl}
+                alt={cat.name}
+                className="mx-auto h-28 w-28 rounded-full object-cover border-4 border-white shadow-md"
+              />
             ) : (
-              <div className="mx-auto inline-flex h-24 w-24 items-center justify-center rounded-full bg-indigo-100 text-5xl">
+              <div className="mx-auto h-28 w-28 rounded-full bg-white/20 flex items-center justify-center text-5xl border-4 border-white/30">
                 🐱
               </div>
             )}
-            <h1 className="mt-3 text-2xl font-bold text-gray-900">{cat.name}</h1>
-            {cat.pin && (
-              <p className="text-xs text-gray-400 mt-1">PIN: {cat.pin}</p>
-            )}
+            <h1 className="mt-3 text-2xl font-bold text-white">{cat.name}</h1>
+            <p className="text-indigo-100 text-sm mt-1">
+              {[cat.breed, cat.gender, cat.age ? `${cat.age}y` : null].filter(Boolean).join(" · ")}
+            </p>
           </div>
 
-          <div className="space-y-3 text-sm">
-            {cat.breed && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Breed</span>
-                <span className="font-medium">{cat.breed}</span>
-              </div>
-            )}
-            {cat.gender && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Gender</span>
-                <span className="font-medium">{cat.gender}</span>
-              </div>
-            )}
-            {cat.color && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Color</span>
-                <span className="font-medium">{cat.color}</span>
-              </div>
-            )}
-            {cat.age && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Age</span>
-                <span className="font-medium">{cat.age} year{cat.age > 1 ? "s" : ""}</span>
-              </div>
-            )}
-            {cat.weight && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Weight</span>
-                <span className="font-medium">{cat.weight} kg</span>
-              </div>
-            )}
-            {cat.microchipId && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Microchip</span>
-                <span className="font-medium font-mono text-xs">{cat.microchipId}</span>
-              </div>
-            )}
+          {/* Details */}
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-center">
+              {cat.weight && (
+                <div className="rounded-lg bg-gray-50 p-3">
+                  <p className="text-xs text-gray-500">Weight</p>
+                  <p className="font-semibold text-gray-900">{cat.weight} kg</p>
+                </div>
+              )}
+              {cat.color && (
+                <div className="rounded-lg bg-gray-50 p-3">
+                  <p className="text-xs text-gray-500">Color</p>
+                  <p className="font-semibold text-gray-900">{cat.color}</p>
+                </div>
+              )}
+              {cat.microchipId && (
+                <div className="rounded-lg bg-gray-50 p-3 col-span-2">
+                  <p className="text-xs text-gray-500">Microchip</p>
+                  <p className="font-semibold text-gray-900 font-mono text-xs">{cat.microchipId}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Medical Alerts */}
-        {(cat.allergies || cat.medicalHistory || cat.dietaryRestrictions) && (
-          <div className="mt-4 rounded-lg bg-red-50 border border-red-200 shadow-md p-6">
-            <h2 className="text-lg font-semibold text-red-800 mb-3">⚠️ Medical Alerts</h2>
-            <div className="space-y-2 text-sm">
+        {(cat.allergies || cat.dietaryRestrictions) && (
+          <div className="mt-4 rounded-2xl bg-red-50 border border-red-200 p-5">
+            <h2 className="font-bold text-red-800 flex items-center gap-2">
+              <span className="text-lg">⚠️</span> Medical Alerts
+            </h2>
+            <div className="mt-2 space-y-2 text-sm">
               {cat.allergies && (
-                <div>
-                  <span className="font-medium text-red-700">Allergies:</span>
-                  <p className="text-red-600">{cat.allergies}</p>
+                <div className="rounded-lg bg-red-100 px-3 py-2">
+                  <span className="font-medium text-red-800">Allergies:</span>
+                  <span className="text-red-700 ml-1">{cat.allergies}</span>
                 </div>
               )}
               {cat.dietaryRestrictions && (
-                <div>
-                  <span className="font-medium text-red-700">Dietary Restrictions:</span>
-                  <p className="text-red-600">{cat.dietaryRestrictions}</p>
-                </div>
-              )}
-              {cat.medicalHistory && (
-                <div>
-                  <span className="font-medium text-red-700">Medical History:</span>
-                  <p className="text-red-600">{cat.medicalHistory}</p>
+                <div className="rounded-lg bg-red-100 px-3 py-2">
+                  <span className="font-medium text-red-800">Diet:</span>
+                  <span className="text-red-700 ml-1">{cat.dietaryRestrictions}</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Care Status (respects privacy) */}
-        {(privacy?.showFeedingSchedule !== false) && (lastFed || lastWater || lastMed) && (
-          <div className="mt-4 rounded-lg bg-blue-50 border border-blue-200 shadow-md p-6">
-            <h2 className="text-lg font-semibold text-blue-800 mb-3">🕐 Recent Care</h2>
-            <div className="space-y-2 text-sm">
+        {/* Recent Care (respects privacy) */}
+        {(privacy?.showFeedingSchedule !== false) && (lastFed || lastWater) && (
+          <div className="mt-4 rounded-2xl bg-blue-50 border border-blue-200 p-5">
+            <h2 className="font-bold text-blue-800 flex items-center gap-2">
+              <span className="text-lg">🕐</span> Last Care
+            </h2>
+            <div className="mt-2 grid grid-cols-2 gap-3">
               {lastFed && (
-                <div className="flex justify-between">
-                  <span className="text-blue-600">🍽️ Last Fed</span>
-                  <span className="font-medium text-blue-800">{timeAgo(lastFed.completedAt || lastFed.createdAt)}</span>
+                <div className="rounded-lg bg-white p-3 text-center border border-blue-100">
+                  <p className="text-lg">🍽️</p>
+                  <p className="text-xs text-gray-500 mt-1">Last Fed</p>
+                  <p className="text-sm font-semibold text-gray-900">{timeAgo(lastFed.completedAt || lastFed.createdAt)}</p>
                 </div>
               )}
               {lastWater && (
-                <div className="flex justify-between">
-                  <span className="text-blue-600">💧 Last Water</span>
-                  <span className="font-medium text-blue-800">{timeAgo(lastWater.completedAt || lastWater.createdAt)}</span>
-                </div>
-              )}
-              {lastMed && (
-                <div className="flex justify-between">
-                  <span className="text-blue-600">💊 Last Medication</span>
-                  <span className="font-medium text-blue-800">{timeAgo(lastMed.completedAt || lastMed.createdAt)}</span>
+                <div className="rounded-lg bg-white p-3 text-center border border-blue-100">
+                  <p className="text-lg">💧</p>
+                  <p className="text-xs text-gray-500 mt-1">Last Water</p>
+                  <p className="text-sm font-semibold text-gray-900">{timeAgo(lastWater.completedAt || lastWater.createdAt)}</p>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Owner contact */}
-        <div className="mt-4 rounded-lg bg-white shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-3">Owner Contact</h2>
-          <div className="space-y-2 text-sm">
-            <p><span className="text-gray-500">Name:</span> {cat.owner.name}</p>
-            <p>
-              <span className="text-gray-500">Email:</span>{" "}
-              <a href={`mailto:${cat.owner.email}`} className="text-indigo-600 underline">
-                {cat.owner.email}
-              </a>
-            </p>
+        {/* Contact Buttons — prominent, one-tap */}
+        <div className="mt-4 rounded-2xl bg-white shadow-lg p-5">
+          <h2 className="font-bold text-gray-900 mb-3">Contact Owner</h2>
+          <div className="space-y-2">
             {cat.owner.phone && (privacy?.showPhone !== false) && (
-              <p>
-                <span className="text-gray-500">Phone:</span>{" "}
-                <a href={`tel:${cat.owner.phone}`} className="text-indigo-600 underline">
-                  {cat.owner.phone}
-                </a>
-              </p>
+              <a
+                href={`tel:${cat.owner.phone}`}
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 px-4 py-3.5 text-white font-semibold hover:bg-green-700 transition-colors shadow-sm"
+              >
+                📞 Call {cat.owner.name}
+              </a>
+            )}
+            <a
+              href={`mailto:${cat.owner.email}?subject=Found your cat ${cat.name}`}
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-white font-semibold hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              ✉️ Email Owner
+            </a>
+            {cat.emergencyContactPhone && (
+              <a
+                href={`tel:${cat.emergencyContactPhone}`}
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-orange-500 px-4 py-3.5 text-white font-semibold hover:bg-orange-600 transition-colors shadow-sm"
+              >
+                🆘 Emergency: {cat.emergencyContactName || "Contact"}
+              </a>
             )}
           </div>
         </div>
 
-        {/* Emergency Contact */}
-        {cat.emergencyContactName && (
-          <div className="mt-4 rounded-lg bg-orange-50 border border-orange-200 shadow-md p-6">
-            <h2 className="text-lg font-semibold text-orange-800 mb-3">🆘 Emergency Contact</h2>
-            <div className="space-y-2 text-sm">
-              <p><span className="text-gray-500">Name:</span> {cat.emergencyContactName}</p>
-              {cat.emergencyContactPhone && (
-                <p>
-                  <span className="text-gray-500">Phone:</span>{" "}
-                  <a href={`tel:${cat.emergencyContactPhone}`} className="text-orange-700 underline font-medium">
-                    {cat.emergencyContactPhone}
-                  </a>
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Vaccinations */}
         {cat.vaccinations.length > 0 && (
-          <div className="mt-4 rounded-lg bg-white shadow-md p-6">
-            <h2 className="text-lg font-semibold mb-3">Vaccination Records</h2>
+          <div className="mt-4 rounded-2xl bg-white shadow-lg p-5">
+            <h2 className="font-bold text-gray-900 mb-3">💉 Vaccinations</h2>
             <div className="space-y-2">
               {cat.vaccinations.map((vax) => (
-                <div key={vax.id} className="flex justify-between text-sm border-b border-gray-100 pb-2">
+                <div key={vax.id} className="flex justify-between text-sm border-b border-gray-100 pb-2 last:border-0">
                   <div>
-                    <p className="font-medium">{vax.name}</p>
+                    <p className="font-medium text-gray-900">{vax.name}</p>
                     {vax.vetName && <p className="text-xs text-gray-500">by {vax.vetName}</p>}
                   </div>
                   <div className="text-right text-xs text-gray-500">
                     <p>{new Date(vax.date).toLocaleDateString()}</p>
-                    {vax.nextDue && <p>Next: {new Date(vax.nextDue).toLocaleDateString()}</p>}
+                    {vax.nextDue && <p className="text-amber-600">Due: {new Date(vax.nextDue).toLocaleDateString()}</p>}
                   </div>
                 </div>
               ))}
@@ -232,14 +203,20 @@ export default async function CatProfilePage({ params }: Props) {
           </div>
         )}
 
-        {/* Found cat button */}
+        {/* Found Cat Button */}
         <div className="mt-6">
           <FoundCatButton catId={cat.id} catName={cat.name} />
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
-          Powered by 🐾 PawPort — Digital Health Passport for Cats
-        </p>
+        {/* Footer */}
+        <div className="mt-8 text-center pb-4">
+          <p className="text-xs text-gray-400">
+            🐾 PawPort — Digital Health Passport for Cats
+          </p>
+          <p className="text-[10px] text-gray-300 mt-1">
+            No app needed. Scan QR or enter PIN at pawport.app/find
+          </p>
+        </div>
       </div>
     </main>
   );
