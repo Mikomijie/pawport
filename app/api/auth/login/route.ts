@@ -28,6 +28,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
+    if (typeof email !== "string" || typeof password !== "string" || email.length > 255 || password.length > 128) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+
     const user = await db.user.findUnique({
       where: { email: email.trim().toLowerCase() },
     });

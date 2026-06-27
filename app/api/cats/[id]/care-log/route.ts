@@ -46,15 +46,17 @@ export async function POST(
   const { type, notes, scheduledAt } = await req.json();
 
   const validTypes = ["FEEDING", "WATER", "MEDICATION", "VET_APPOINTMENT", "BEHAVIOUR_NOTE"];
-  if (!type || !validTypes.includes(type)) {
+  if (!type || typeof type !== "string" || !validTypes.includes(type)) {
     return NextResponse.json({ error: "Invalid log type" }, { status: 400 });
   }
+
+  const sanitizedNotes = notes ? String(notes).trim().replace(/[<>]/g, "").slice(0, 500) : null;
 
   const log = await db.careLog.create({
     data: {
       catId: id,
       type,
-      notes: notes ? String(notes).slice(0, 500) : null,
+      notes: sanitizedNotes,
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       completedAt: new Date(),
     },

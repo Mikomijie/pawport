@@ -33,7 +33,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const cleanName = sanitizeInput(name);
+    if (name.length > 100) {
+      return NextResponse.json({ error: "Name must be under 100 characters" }, { status: 400 });
+    }
+    if (email.length > 255) {
+      return NextResponse.json({ error: "Email must be under 255 characters" }, { status: 400 });
+    }
+    if (phone && phone.length > 20) {
+      return NextResponse.json({ error: "Phone must be under 20 characters" }, { status: 400 });
+    }
+
+    const cleanName = sanitizeInput(name, 100);
     const cleanEmail = email.trim().toLowerCase();
 
     if (!validateEmail(cleanEmail)) {

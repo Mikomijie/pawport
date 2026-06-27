@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MapPin, CheckCircle } from "lucide-react";
 
 interface Props {
   catId: string;
@@ -63,10 +64,11 @@ export function FoundCatButton({ catId, catName }: Props) {
 
   if (status === "success") {
     return (
-      <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-center">
-        <p className="text-green-800 font-medium">✅ Thank you!</p>
-        <p className="text-sm text-green-700 mt-1">
-          Your location has been shared with {catName}&apos;s owner. They&apos;ll be so grateful!
+      <div className="rounded-[12px] bg-[#EDF7F2] border border-[#81B29A] p-5 text-center">
+        <CheckCircle size={24} className="mx-auto text-[#2D6A4F]" />
+        <p className="mt-2 font-body font-semibold text-[#2D6A4F]">Thank you!</p>
+        <p className="text-sm text-[#6B5B52] font-body mt-1">
+          Your location has been shared with {catName}&apos;s owner.
         </p>
       </div>
     );
@@ -80,25 +82,27 @@ export function FoundCatButton({ catId, catName }: Props) {
         onChange={(e) => setMessage(e.target.value)}
         maxLength={500}
         rows={2}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-4 py-3 text-sm font-body text-[#2C1810] focus:border-[#E07A5F] focus:outline-none focus:ring-1 focus:ring-[#E07A5F] transition-colors duration-200"
       />
 
       <button
         onClick={handleFoundCat}
         disabled={status === "locating" || status === "sending"}
-        className="w-full rounded-lg bg-green-600 px-4 py-3 text-white font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 rounded-[12px] bg-[#E07A5F] px-4 py-4 text-white font-body font-bold text-base hover:opacity-90 disabled:opacity-50 transition-opacity duration-200"
+        style={{ height: "56px" }}
       >
-        {status === "locating" && "📍 Getting your location..."}
+        <MapPin size={18} />
+        {status === "locating" && "Getting your location..."}
         {status === "sending" && "Sending report..."}
-        {status === "idle" && "📍 I Found This Cat!"}
-        {status === "error" && "📍 Try Again"}
+        {status === "idle" && "I Found This Cat"}
+        {status === "error" && "Try Again"}
       </button>
 
       {errorMsg && (
-        <p className="text-sm text-red-600 text-center" role="alert">{errorMsg}</p>
+        <p className="text-sm text-[#C1432A] text-center font-body" role="alert">{errorMsg}</p>
       )}
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-[11px] text-[#6B5B52] text-center font-body">
         This will share your current GPS location with the owner to help reunite them with {catName}.
       </p>
     </div>

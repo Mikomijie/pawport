@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Shield } from "lucide-react";
 
 interface Props {
   catId: string;
@@ -61,52 +62,47 @@ export function PrivacySettings({ catId }: Props) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-xs text-gray-400 hover:text-indigo-600 underline transition-colors"
+        className="flex items-center gap-1.5 text-[13px] text-[#6B5B52] hover:text-[#E07A5F] font-body font-medium transition-colors duration-200"
       >
-        🔒 Privacy Settings
+        <Shield size={14} />
+        Privacy Settings
       </button>
     );
   }
 
   return (
-    <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold text-gray-700">🔒 Privacy Controls</p>
-        <button onClick={() => setOpen(false)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
+    <div className="p-4 bg-[#F8F4F1] rounded-[10px]">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[13px] font-body font-semibold text-[#2C1810] flex items-center gap-1.5">
+          <Shield size={14} /> Privacy Controls
+        </p>
+        <button onClick={() => setOpen(false)} className="text-[13px] text-[#6B5B52] hover:text-[#2C1810] font-body transition-colors duration-200">Close</button>
       </div>
 
       {!settings ? (
-        <p className="text-xs text-gray-400">Loading...</p>
+        <p className="text-[13px] text-[#6B5B52] font-body">Loading...</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {(Object.keys(labels) as (keyof Settings)[]).map((field) => (
             <label key={field} className="flex items-center justify-between cursor-pointer">
-              <span className="text-xs text-gray-600">{labels[field]}</span>
+              <span className="text-[13px] text-[#2C1810] font-body">{labels[field]}</span>
               <button
                 type="button"
                 onClick={() => toggle(field)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                  settings[field] ? "bg-indigo-600" : "bg-gray-300"
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${
+                  settings[field] ? "bg-[#E07A5F]" : "bg-[#E0D8D2]"
                 }`}
               >
-                <span
-                  className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
-                    settings[field] ? "translate-x-4.5" : "translate-x-0.5"
-                  }`}
-                />
+                <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform duration-200 ${settings[field] ? "translate-x-4" : "translate-x-0.5"}`} />
               </button>
             </label>
           ))}
 
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="text-xs px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
-            >
+          <div className="flex items-center gap-2 pt-2">
+            <button onClick={handleSave} disabled={saving} className="text-[13px] font-body font-medium px-4 py-2 bg-[#E07A5F] text-white rounded-[10px] hover:opacity-90 disabled:opacity-50 transition-opacity duration-200">
               {saving ? "Saving..." : "Save"}
             </button>
-            {saved && <span className="text-xs text-green-600">✓ Saved</span>}
+            {saved && <span className="text-[13px] text-[#81B29A] font-body font-medium">Saved</span>}
           </div>
         </div>
       )}

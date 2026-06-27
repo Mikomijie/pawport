@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { validateCoordinates } from "@/lib/validations";
 
 // Public endpoint — no auth required (this is what the finder uses)
 export async function POST(
@@ -10,13 +11,10 @@ export async function POST(
     const { id } = await params;
     const { latitude, longitude, message } = await req.json();
 
-    if (typeof latitude !== "number" || typeof longitude !== "number") {
-      return NextResponse.json({ error: "Valid coordinates are required" }, { status: 400 });
-    }
-
-    // Validate coordinate ranges
-    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-      return NextResponse.json({ error: "Coordinates out of range" }, { status: 400 });
+    // Validate coordinates thoroughly
+    const coordCheck = validateCoordinates(latitude, longitude);
+    if (!coordCheck.valid) {
+      return NextResponse.json({ error: coordCheck.error }, { status: 400 });
     }
 
     // Verify cat exists
@@ -30,11 +28,17 @@ export async function POST(
         catId: id,
         latitude,
         longitude,
-        message: message ? String(message).slice(0, 500) : null,
+        message: message ? String(message).slice(0, 500).trim().replace(/[<>]/g, "") : null,
       },
     });
 
-    return NextResponse.json(sighting, { status: 201 });
+    // Only return necessary fields, not internal IDs
+    return NextResponse.json({
+      id: sighting.id,
+      latitude: sighting.latitude,
+      longitude: sighting.longitude,
+      createdAt: sighting.createdAt,
+    }, { status: 201 });
   } catch (error) {
     console.error("Sighting error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

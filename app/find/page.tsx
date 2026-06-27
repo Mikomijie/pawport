@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Search } from "lucide-react";
 
 export default function FindCatPage() {
   const router = useRouter();
@@ -33,16 +34,17 @@ export default function FindCatPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
+    <main className="flex min-h-screen items-center justify-center px-4" style={{ background: "#FDFBF7" }}>
+      <div className="w-full max-w-[400px]">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold">🐾 PawPort</Link>
-          <p className="mt-2 text-gray-600">Enter a cat&apos;s PIN to view their profile</p>
+          <Link href="/" className="font-display font-bold text-2xl text-[#2C1810]">PawPort</Link>
+          <h2 className="mt-4 font-display font-bold text-[32px] text-[#2C1810]">Found a Cat?</h2>
+          <p className="mt-2 text-[#6B5B52] text-[15px] font-body">Enter the 6-digit PIN from their collar tag</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 text-center" role="alert">
+            <div className="rounded-[10px] bg-[#FEF2F2] border border-[#FECACA] p-3 text-sm text-[#C1432A] text-center font-body" role="alert">
               {error}
             </div>
           )}
@@ -55,10 +57,11 @@ export default function FindCatPage() {
               inputMode="numeric"
               pattern="\d{6}"
               maxLength={6}
-              placeholder="Enter 6-digit PIN"
+              placeholder="000000"
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              className="block w-full rounded-lg border border-gray-300 px-4 py-4 text-center text-3xl font-mono tracking-[0.5em] shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="block w-full rounded-[12px] border-2 border-[#E0D8D2] bg-white px-4 py-5 text-center text-2xl font-body font-bold tracking-[8px] text-[#2C1810] focus:border-[#E07A5F] focus:outline-none focus:ring-1 focus:ring-[#E07A5F] transition-colors duration-200"
+              style={{ height: "64px" }}
               autoFocus
             />
           </div>
@@ -66,14 +69,15 @@ export default function FindCatPage() {
           <button
             type="submit"
             disabled={loading || pin.length !== 6}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-3 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+            className="w-full btn-primary px-4 py-4 font-body font-semibold text-base disabled:opacity-50 flex items-center justify-center gap-2"
           >
+            <Search size={18} />
             {loading ? "Looking up..." : "Find Cat"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Found a cat with a PawPort tag? Enter the PIN number shown on their collar tag.
+        <p className="mt-6 text-center text-sm text-[#6B5B52] font-body">
+          Found a cat with a PawPort tag? Enter the PIN number shown on their collar.
         </p>
       </div>
     </main>

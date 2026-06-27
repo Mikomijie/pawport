@@ -45,9 +45,21 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const { isLost, ...rest } = body;
+  const { isLost } = body;
 
-  const updateData: Record<string, unknown> = { ...rest };
+  // Allowlist: only these fields can be updated via PATCH
+  const allowedFields = ["name", "breed", "color", "age", "gender", "weight", "microchipId", "allergies", "dietaryRestrictions", "medicalHistory", "emergencyContactName", "emergencyContactPhone"];
+  const updateData: Record<string, unknown> = {};
+
+  for (const field of allowedFields) {
+    if (body[field] !== undefined) {
+      if (typeof body[field] === "string") {
+        updateData[field] = body[field].trim().replace(/[<>]/g, "").slice(0, 500);
+      } else {
+        updateData[field] = body[field];
+      }
+    }
+  }
 
   if (typeof isLost === "boolean") {
     updateData.isLost = isLost;

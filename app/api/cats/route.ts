@@ -52,6 +52,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cat name is required" }, { status: 400 });
     }
 
+    if (name.length > 100) {
+      return NextResponse.json({ error: "Cat name must be under 100 characters" }, { status: 400 });
+    }
+
     // Handle photo upload
     let photoUrl: string | null = null;
     if (photo && photo.size > 0) {

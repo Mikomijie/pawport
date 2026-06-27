@@ -1,5 +1,65 @@
 @import "tailwindcss";
 
+:root {
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --color-cream: #FDFBF7;
+  --color-terracotta: #E07A5F;
+  --color-sage: #81B29A;
+  --color-danger: #C1432A;
+  --color-espresso: #2C1810;
+  --color-warm-grey: #6B5B52;
+  --color-card-shadow: rgba(44, 24, 16, 0.08);
+}
+
 body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-espresso);
+  font-family: var(--font-inter);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-playfair);
+}
+
+.font-display {
+  font-family: var(--font-playfair);
+}
+
+.font-body {
+  font-family: var(--font-inter);
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px var(--color-card-shadow);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(44, 24, 16, 0.12);
+}
+
+.btn-primary {
+  background-color: var(--color-terracotta);
+  color: white;
+  border-radius: 10px;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-outline {
+  background-color: white;
+  color: var(--color-terracotta);
+  border: 1.5px solid var(--color-terracotta);
+  border-radius: 10px;
+  transition: all 200ms ease;
+}
+
+.btn-outline:hover {
+  background-color: #FEF7F5;
 }
