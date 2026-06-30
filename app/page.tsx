@@ -30,22 +30,22 @@ export default function HomePage() {
 
             {/* Two-path split */}
             <div className="mt-8 grid sm:grid-cols-2 gap-3 animate-fade-up delay-1000">
-              <Link href="/register" className="group block p-5 rounded-2xl border-2 border-[#E07A5F] bg-white hover:bg-[#FEF7F5] transition-all duration-200 active:scale-[0.98]">
+              <Link href="/register" className="group block p-5 rounded-2xl border-2 border-[#E07A5F] bg-white hover:bg-[#FEF7F5] hover:scale-[1.02] hover:shadow-lg hover:shadow-[#E07A5F]/10 transition-all duration-200 active:scale-[0.98]">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield size={20} className="text-[#E07A5F]" />
                   <span className="font-body font-semibold text-sm text-[#2C1810]">I want to protect my cat</span>
                 </div>
                 <p className="text-[12px] text-[#6B5B52] font-body leading-relaxed">Register, get a QR tag, track health, set up lost alerts</p>
-                <span className="mt-3 inline-block btn-primary px-4 py-2 text-xs font-body font-semibold group-hover:opacity-90">Get Started Free</span>
+                <span className="mt-3 inline-block btn-primary px-4 py-2 text-xs font-body font-semibold group-hover:shadow-md group-hover:shadow-[#E07A5F]/20">Get Started Free</span>
               </Link>
 
-              <Link href="/find" className="group block p-5 rounded-2xl border-2 border-[#81B29A] bg-white hover:bg-[#F0FAF5] transition-all duration-200 active:scale-[0.98]">
+              <Link href="/find" className="group block p-5 rounded-2xl border-2 border-[#81B29A] bg-white hover:bg-[#F0FAF5] hover:scale-[1.02] hover:shadow-lg hover:shadow-[#81B29A]/10 transition-all duration-200 active:scale-[0.98]">
                 <div className="flex items-center gap-2 mb-2">
                   <Search size={20} className="text-[#81B29A]" />
                   <span className="font-body font-semibold text-sm text-[#2C1810]">I found a cat</span>
                 </div>
                 <p className="text-[12px] text-[#6B5B52] font-body leading-relaxed">Enter a PIN or scan a QR code to see the owner&apos;s info</p>
-                <span className="mt-3 inline-block px-4 py-2 text-xs font-body font-semibold rounded-[10px] bg-[#81B29A] text-white group-hover:opacity-90">Find Cat by PIN</span>
+                <span className="mt-3 inline-block px-4 py-2 text-xs font-body font-semibold rounded-[10px] bg-[#81B29A] text-white group-hover:shadow-md group-hover:shadow-[#81B29A]/20">Find Cat by PIN</span>
               </Link>
             </div>
 

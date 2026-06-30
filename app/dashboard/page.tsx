@@ -4,6 +4,7 @@ import { CatCard } from "./cat-card";
 import { RegisterCatForm } from "./register-cat-form";
 import { LogoutButton } from "./logout-button";
 import { PawLogo } from "../components/paw-logo";
+import { Cat, AlertTriangle, ClipboardList, MapPin } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -50,20 +51,24 @@ export default async function DashboardPage() {
         {/* Stats */}
         <div className="flex flex-wrap justify-center gap-3 mb-6">
           <div className="stat-card px-5 py-3 text-center min-w-[140px] max-w-[200px]">
+            <Cat size={16} className="mx-auto text-[#E07A5F] mb-1" />
             <p className="font-display font-bold text-[36px] text-[#E07A5F] leading-tight">{cats.length}</p>
             <p className="text-[11px] uppercase tracking-widest text-[#6B5B52] font-body mt-0.5">Cats</p>
           </div>
           <div className="stat-card px-5 py-3 text-center min-w-[140px] max-w-[200px]">
+            <AlertTriangle size={16} className={`mx-auto mb-1 ${lostCount > 0 ? "text-[#C1432A]" : "text-[#81B29A]"}`} />
             <p className={`font-display font-bold text-[36px] leading-tight ${lostCount > 0 ? "text-[#C1432A]" : "text-[#81B29A]"}`}>
               {lostCount > 0 ? lostCount : "0"}
             </p>
             <p className="text-[11px] uppercase tracking-widest text-[#6B5B52] font-body mt-0.5">{lostCount > 0 ? "Lost" : "All Safe"}</p>
           </div>
           <div className="stat-card px-5 py-3 text-center min-w-[140px] max-w-[200px]">
+            <ClipboardList size={16} className="mx-auto text-[#E07A5F] mb-1" />
             <p className="font-display font-bold text-[36px] text-[#E07A5F] leading-tight">{totalLogs}</p>
             <p className="text-[11px] uppercase tracking-widest text-[#6B5B52] font-body mt-0.5">Care Logs</p>
           </div>
           <div className="stat-card px-5 py-3 text-center min-w-[140px] max-w-[200px]">
+            <MapPin size={16} className="mx-auto text-[#E07A5F] mb-1" />
             <p className="font-display font-bold text-[36px] text-[#E07A5F] leading-tight">{totalSightings}</p>
             <p className="text-[11px] uppercase tracking-widest text-[#6B5B52] font-body mt-0.5">Sightings</p>
           </div>

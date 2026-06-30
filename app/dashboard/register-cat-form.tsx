@@ -34,7 +34,7 @@ export function RegisterCatForm({ autoExpand = false }: { autoExpand?: boolean }
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="mb-5 w-full rounded-2xl border-2 border-dashed border-[#E0D8D2] p-4 text-[#6B5B52] hover:border-[#E07A5F] hover:text-[#E07A5F] transition-all duration-200 font-body font-medium text-sm active:scale-[0.99]">
+      <button onClick={() => setOpen(true)} className="mb-5 w-full rounded-2xl bg-[#E07A5F] text-white p-4 font-body font-semibold text-sm hover:bg-[#C96B52] transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md">
         + Register a new cat
       </button>
     );
