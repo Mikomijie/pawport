@@ -70,14 +70,16 @@ export async function POST(req: NextRequest) {
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
       await mkdir(uploadsDir, { recursive: true });
 
-      const ext = photo.name.split(".").pop() || "jpg";
+      const ext = (photo.name.split(".").pop() || "jpg").replace(/[^a-zA-Z0-9]/g, "");
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const filepath = path.join(uploadsDir, filename);
+      // Sanitize filename - prevent directory traversal attacks
+      const sanitizedFilename = path.basename(filename);
+      const filepath = path.join(uploadsDir, sanitizedFilename);
 
       const buffer = Buffer.from(await photo.arrayBuffer());
       await writeFile(filepath, buffer);
 
-      photoUrl = `/uploads/${filename}`;
+      photoUrl = `/uploads/${sanitizedFilename}`;
     }
 
     const pin = await generateUniquePin();
