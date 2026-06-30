@@ -88,7 +88,19 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
             {cats.map((cat) => (
-              <CatCard key={cat.id} cat={cat} />
+              <CatCard key={cat.id} cat={{
+                ...cat,
+                lostAt: cat.lostAt ? cat.lostAt.toISOString() : null,
+                careLogs: cat.careLogs.map((log) => ({
+                  ...log,
+                  completedAt: log.completedAt ? log.completedAt.toISOString() : null,
+                  createdAt: log.createdAt.toISOString(),
+                })),
+                escalations: cat.escalations.map((esc) => ({
+                  ...esc,
+                  createdAt: esc.createdAt.toISOString(),
+                })),
+              }} />
             ))}
           </div>
         )}

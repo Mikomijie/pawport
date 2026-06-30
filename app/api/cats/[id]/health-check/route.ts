@@ -131,7 +131,12 @@ IMPORTANT RULES:
     }
 
     return NextResponse.json({
-      ...healthData,
+      healthScore: typeof healthData.healthScore === "number" ? Math.min(10, Math.max(1, healthData.healthScore)) : 5,
+      confidence: healthData.confidence || "medium",
+      reasoning: typeof healthData.reasoning === "string" ? healthData.reasoning.replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "") : null,
+      observations: Array.isArray(healthData.observations) ? healthData.observations.map((o: unknown) => String(o).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],
+      warnings: Array.isArray(healthData.warnings) ? healthData.warnings.map((w: unknown) => String(w).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],
+      recommendations: Array.isArray(healthData.recommendations) ? healthData.recommendations.map((r: unknown) => String(r).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],
       dataUsed: {
         careLogsCount: cat.careLogs.length,
         vaccinationsCount: cat.vaccinations.length,
