@@ -4,7 +4,7 @@ import path from "path";
 
 async function run() {
   const worker = await Worker.create({
-    workflowsPath: path.resolve(__dirname, "./workflows"),
+    workflowsPath: path.resolve(__dirname, "./workflows.ts"),
     activities,
     taskQueue: "pawport-lost-cat",
     // Connect to local Temporal server (default: localhost:7233)

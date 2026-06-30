@@ -2,10 +2,12 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronDown, Camera } from "lucide-react";
 
-export function RegisterCatForm() {
+export function RegisterCatForm({ autoExpand = false }: { autoExpand?: boolean }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoExpand);
+  const [showHealth, setShowHealth] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -14,164 +16,100 @@ export function RegisterCatForm() {
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError("Image must be under 5MB");
-        return;
-      }
+      if (file.size > 5 * 1024 * 1024) { setError("Image must be under 5MB"); return; }
       setPreview(URL.createObjectURL(file));
-    } else {
-      setPreview(null);
-    }
+    } else { setPreview(null); }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
-
     const formData = new FormData(e.currentTarget);
-
-    const res = await fetch("/api/cats", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (res.ok) {
-      setOpen(false);
-      setPreview(null);
-      router.refresh();
-    } else {
-      const data = await res.json();
-      setError(data.error || "Failed to register cat");
-    }
+    const res = await fetch("/api/cats", { method: "POST", body: formData });
+    if (res.ok) { setOpen(false); setPreview(null); setShowHealth(false); router.refresh(); }
+    else { const data = await res.json(); setError(data.error || "Failed to register cat"); }
     setLoading(false);
   }
 
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="mb-6 w-full rounded-lg border-2 border-dashed border-gray-300 p-4 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
-      >
+      <button onClick={() => setOpen(true)} className="mb-5 w-full rounded-2xl border-2 border-dashed border-[#E0D8D2] p-4 text-[#6B5B52] hover:border-[#E07A5F] hover:text-[#E07A5F] transition-all duration-200 font-body font-medium text-sm active:scale-[0.99]">
         + Register a new cat
       </button>
     );
   }
 
   return (
-    <div className="mb-6 rounded-lg bg-white shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-4">Register New Cat</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <p className="text-sm text-red-600" role="alert">{error}</p>
-        )}
+    <div className="mb-5 card p-6 relative overflow-hidden">
+      {/* Decorative cat silhouette */}
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]">
+        <svg viewBox="0 0 100 100" fill="#E07A5F"><ellipse cx="50" cy="60" rx="30" ry="35"/><polygon points="25,30 35,5 45,28"/><polygon points="55,28 65,5 75,30"/><circle cx="40" cy="50" r="3"/><circle cx="60" cy="50" r="3"/></svg>
+      </div>
 
-        {/* Photo upload */}
-        <div className="flex items-center gap-4">
-          <div
-            className="h-20 w-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-400 transition-colors"
-            onClick={() => fileRef.current?.click()}
-          >
-            {preview ? (
-              <img src={preview} alt="Preview" className="h-full w-full object-cover" />
-            ) : (
-              <span className="text-2xl">📷</span>
-            )}
+      <h3 className="font-display font-bold text-xl text-[#2C1810] mb-4">Register Your Cat</h3>
+
+      <form onSubmit={handleSubmit} className="space-y-4 relative">
+        {error && <div className="rounded-[10px] bg-[#FEF2F2] border border-[#FECACA] p-2.5 text-[13px] text-[#C1432A] font-body" role="alert">{error}</div>}
+
+        {/* Photo + basic fields */}
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 cursor-pointer" onClick={() => fileRef.current?.click()}>
+            <div className="h-[72px] w-[72px] rounded-full bg-[#F8F4F1] border-2 border-dashed border-[#E0D8D2] flex items-center justify-center overflow-hidden hover:border-[#E07A5F] transition-colors duration-200">
+              {preview ? (
+                <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+              ) : (
+                <Camera size={22} className="text-[#C4A99A]" />
+              )}
+            </div>
+            <input ref={fileRef} name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handlePhotoChange} className="hidden" />
           </div>
-          <div>
-            <label htmlFor="cat-photo" className="block text-sm font-medium text-gray-700">Cat Photo</label>
-            <input
-              ref={fileRef}
-              id="cat-photo"
-              name="photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              onChange={handlePhotoChange}
-              className="mt-1 text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
-            />
-            <p className="mt-0.5 text-xs text-gray-400">Max 5MB. JPEG, PNG, WebP, or GIF.</p>
+          <div className="flex-1 grid grid-cols-2 gap-2.5">
+            <div className="col-span-2 sm:col-span-1">
+              <input name="name" required placeholder="Cat name *" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <input name="breed" placeholder="Breed" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+            </div>
+            <select name="gender" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200">
+              <option value="">Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Unknown">Unknown</option>
+            </select>
+            <input name="age" type="number" min="0" max="30" placeholder="Age (yrs)" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
           </div>
         </div>
 
-        {/* Basic Info */}
-        <fieldset>
-          <legend className="text-sm font-medium text-gray-700 mb-2">Basic Information</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label htmlFor="cat-name" className="block text-xs font-medium text-gray-600">Name *</label>
-              <input id="cat-name" name="name" required className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-breed" className="block text-xs font-medium text-gray-600">Breed</label>
-              <input id="cat-breed" name="breed" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-gender" className="block text-xs font-medium text-gray-600">Gender</label>
-              <select id="cat-gender" name="gender" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                <option value="">Select...</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Unknown">Unknown</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="cat-age" className="block text-xs font-medium text-gray-600">Age (years)</label>
-              <input id="cat-age" name="age" type="number" min="0" max="30" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-weight" className="block text-xs font-medium text-gray-600">Weight (kg)</label>
-              <input id="cat-weight" name="weight" type="number" step="0.1" min="0" max="30" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-color" className="block text-xs font-medium text-gray-600">Color</label>
-              <input id="cat-color" name="color" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <div className="grid grid-cols-2 gap-2.5">
+          <input name="color" placeholder="Color" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+          <input name="weight" type="number" step="0.1" min="0" max="30" placeholder="Weight (kg)" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+        </div>
+
+        {/* Expandable health section */}
+        <button type="button" onClick={() => setShowHealth(!showHealth)} className="flex items-center gap-1.5 text-[13px] font-body font-medium text-[#E07A5F] hover:text-[#C1432A] transition-colors duration-200">
+          <ChevronDown size={14} className={`transition-transform duration-200 ${showHealth ? "rotate-180" : ""}`} />
+          {showHealth ? "Hide health details" : "Add health details (optional)"}
+        </button>
+
+        {showHealth && (
+          <div className="space-y-2.5 animate-fade-in pt-1">
+            <input name="allergies" placeholder="Allergies (e.g. chicken, certain meds)" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+            <input name="dietaryRestrictions" placeholder="Dietary restrictions (e.g. grain-free)" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+            <textarea name="medicalHistory" rows={2} placeholder="Medical history (e.g. spayed 2023)" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200 resize-none" />
+            <input name="microchipId" placeholder="Microchip ID" className="w-full rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+            <div className="grid grid-cols-2 gap-2.5">
+              <input name="emergencyContactName" placeholder="Emergency contact name" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
+              <input name="emergencyContactPhone" type="tel" placeholder="Emergency phone" className="rounded-[10px] border-[1.5px] border-[#E0D8D2] bg-[#FDFBF7] px-3 py-2.5 text-sm font-body text-[#2C1810] placeholder:text-[#C4A99A] focus:border-[#E07A5F] focus:outline-none transition-colors duration-200" />
             </div>
           </div>
-        </fieldset>
+        )}
 
-        {/* Health Info */}
-        <fieldset>
-          <legend className="text-sm font-medium text-gray-700 mb-2">Health Information</legend>
-          <div className="space-y-3">
-            <div>
-              <label htmlFor="cat-allergies" className="block text-xs font-medium text-gray-600">Allergies</label>
-              <input id="cat-allergies" name="allergies" placeholder="e.g. chicken, certain medications" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-dietary" className="block text-xs font-medium text-gray-600">Dietary Restrictions</label>
-              <input id="cat-dietary" name="dietaryRestrictions" placeholder="e.g. grain-free, wet food only" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-medical" className="block text-xs font-medium text-gray-600">Medical History</label>
-              <textarea id="cat-medical" name="medicalHistory" rows={2} placeholder="e.g. spayed 2023, dental cleaning 2024" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-microchip" className="block text-xs font-medium text-gray-600">Microchip ID</label>
-              <input id="cat-microchip" name="microchipId" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Emergency Contact */}
-        <fieldset>
-          <legend className="text-sm font-medium text-gray-700 mb-2">Emergency Contact</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <label htmlFor="cat-emergency-name" className="block text-xs font-medium text-gray-600">Contact Name</label>
-              <input id="cat-emergency-name" name="emergencyContactName" placeholder="Backup contact person" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label htmlFor="cat-emergency-phone" className="block text-xs font-medium text-gray-600">Contact Phone</label>
-              <input id="cat-emergency-phone" name="emergencyContactPhone" type="tel" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-            </div>
-          </div>
-        </fieldset>
-
-        <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={loading} className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white font-medium hover:bg-indigo-700 disabled:opacity-50">
+        <div className="flex gap-2.5 pt-1">
+          <button type="submit" disabled={loading} className="btn-primary px-5 py-2.5 font-body font-semibold text-sm disabled:opacity-50">
             {loading ? "Saving..." : "Register Cat"}
           </button>
-          <button type="button" onClick={() => { setOpen(false); setPreview(null); }} className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <button type="button" onClick={() => { setOpen(false); setPreview(null); setShowHealth(false); }} className="px-4 py-2.5 rounded-[10px] border border-[#E0D8D2] text-sm font-body text-[#6B5B52] hover:bg-[#F8F4F1] transition-colors duration-200">
             Cancel
           </button>
         </div>

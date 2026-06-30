@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { FoundCatButton } from "./found-cat-button";
+import { FinderTips } from "./finder-tips";
 import { AlertTriangle, Phone, Mail, UtensilsCrossed, Droplets } from "lucide-react";
 
 interface Props {
@@ -162,6 +163,17 @@ export default async function CatProfilePage({ params }: Props) {
         {/* Found Cat Button */}
         <div className="mt-6">
           <FoundCatButton catId={cat.id} catName={cat.name} />
+        </div>
+
+        {/* Finder Tips — AI-powered care guidance */}
+        <div className="mt-4">
+          <FinderTips
+            catName={cat.name}
+            allergies={cat.allergies}
+            dietaryRestrictions={cat.dietaryRestrictions}
+            medicalHistory={cat.medicalHistory}
+            isLost={cat.isLost}
+          />
         </div>
 
         {/* Footer */}

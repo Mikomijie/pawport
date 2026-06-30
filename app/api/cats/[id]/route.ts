@@ -73,12 +73,17 @@ export async function PATCH(
 
   // Handle Temporal workflow for lost/found status changes
   if (typeof isLost === "boolean") {
+    console.log(`[Temporal] Lost status changed to ${isLost} for cat "${cat.name}" (${id})`);
+    console.log(`[Temporal] Attempting to connect to Temporal at ${process.env.TEMPORAL_ADDRESS || "localhost:7233"}...`);
+
     try {
       const temporalClient = await getTemporalClient();
       const workflowId = getLostCatWorkflowId(id);
+      console.log(`[Temporal] Connected. Workflow ID: ${workflowId}`);
 
       if (isLost) {
         // Start escalation workflow
+        console.log(`[Temporal] Starting lostCatEscalationWorkflow...`);
         await temporalClient.workflow.start("lostCatEscalationWorkflow", {
           taskQueue: TASK_QUEUE,
           workflowId,
@@ -89,25 +94,23 @@ export async function PATCH(
             ownerEmail: cat.owner.email,
           }],
         });
-        console.log(`[Temporal] Started escalation workflow for cat "${cat.name}" (${workflowId})`);
+        console.log(`[Temporal] SUCCESS: Workflow started for cat "${cat.name}" (${workflowId})`);
       } else {
         // Cancel escalation workflow (cat was found)
+        console.log(`[Temporal] Cancelling workflow for cat "${cat.name}"...`);
         try {
           const handle = temporalClient.workflow.getHandle(workflowId);
           await handle.cancel();
-          console.log(`[Temporal] Cancelled escalation workflow for cat "${cat.name}" (${workflowId})`);
+          console.log(`[Temporal] SUCCESS: Workflow cancelled for cat "${cat.name}" (${workflowId})`);
         } catch (cancelErr: unknown) {
-          // Workflow may not exist or already completed — that's fine
           const message = cancelErr instanceof Error ? cancelErr.message : String(cancelErr);
           console.log(`[Temporal] Could not cancel workflow ${workflowId}: ${message}`);
         }
       }
     } catch (temporalErr: unknown) {
-      // Don't fail the API request if Temporal is unavailable
-      // The lost/found status is still updated in the DB
       const message = temporalErr instanceof Error ? temporalErr.message : String(temporalErr);
-      console.error(`[Temporal] Error: ${message}`);
-      console.error("[Temporal] Ensure Temporal server is running: temporal server start-dev");
+      console.error(`[Temporal] FAILED: ${message}`);
+      console.error("[Temporal] Is Temporal server running? Start with: temporal server start-dev");
     }
   }
 

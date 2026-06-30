@@ -59,6 +59,8 @@ ${cat.vaccinations.length > 0 ? cat.vaccinations.map(v => `- ${v.name} (${v.date
 Please respond in this exact JSON format:
 {
   "healthScore": <number 1-10>,
+  "confidence": "<high/medium/low based on how much data is available>",
+  "reasoning": "<one sentence explaining what data you based this score on>",
   "observations": ["<observation 1>", "<observation 2>"],
   "warnings": ["<warning if any>"],
   "recommendations": ["<recommendation 1>", "<recommendation 2>"],
@@ -66,7 +68,13 @@ Please respond in this exact JSON format:
   "weightStatus": "<underweight/healthy/overweight/unknown>"
 }
 
-Base your assessment on the available data. If data is missing, note that in observations and recommend the owner track it. Be helpful but conservative with warnings.`;
+IMPORTANT RULES:
+- NEVER use markdown formatting (no ** or * or # or _)
+- Base your assessment ONLY on the provided data — do not assume or infer beyond what is given
+- If data is insufficient, set confidence to "low" and explain what is missing
+- Be conservative with warnings — only flag genuine concerns
+- Always recommend vet consultation for anything beyond routine care
+- You are NOT a veterinarian. This is a decision-support tool, not a diagnosis.`;
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -124,7 +132,15 @@ Base your assessment on the available data. If data is missing, note that in obs
 
     return NextResponse.json({
       ...healthData,
-      disclaimer: "⚠️ This is an AI-generated health assessment and NOT a medical diagnosis. Always consult a licensed veterinarian for medical decisions.",
+      dataUsed: {
+        careLogsCount: cat.careLogs.length,
+        vaccinationsCount: cat.vaccinations.length,
+        hasWeight: !!cat.weight,
+        hasAge: !!cat.age,
+        hasAllergies: !!cat.allergies,
+        hasMedicalHistory: !!cat.medicalHistory,
+      },
+      disclaimer: "This is an AI-generated health assessment and NOT a medical diagnosis. The AI analyzed the data points listed above to form this assessment. Always consult a licensed veterinarian for medical decisions. You remain in control of all health decisions for your cat.",
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
