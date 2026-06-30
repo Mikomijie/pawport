@@ -112,28 +112,52 @@ IMPORTANT RULES:
     // Parse the JSON response from the AI
     let healthData;
     try {
-      // Try to extract JSON from potential markdown code blocks
+      // Try multiple extraction strategies
+      let jsonStr = content;
+      
+      // Strategy 1: Extract from markdown code blocks
       const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-      const jsonStr = codeBlockMatch ? codeBlockMatch[1].trim() : content;
+      if (codeBlockMatch) {
+        jsonStr = codeBlockMatch[1].trim();
+      }
+      
+      // Strategy 2: Find the outermost JSON object
       const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-      healthData = JSON.parse(jsonMatch ? jsonMatch[0] : jsonStr);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+
+      healthData = JSON.parse(jsonStr);
     } catch {
-      // If JSON parsing fails, present the AI's raw text as the analysis
-      const lines = content.split("\n").filter((l: string) => l.trim());
+      // JSON parsing failed — try to extract score from raw text
+      const scoreMatch = content.match(/"healthScore"\s*:\s*(\d+)/);
+      const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 5;
+      
+      // Clean the raw text into readable observations
+      const lines = content
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/[{}"\\]/g, "")
+        .replace(/healthScore\s*:\s*\d+,?/g, "")
+        .replace(/confidence\s*:\s*\w+,?/g, "")
+        .replace(/reasoning\s*:/g, "")
+        .split("\n")
+        .map((l: string) => l.trim())
+        .filter((l: string) => l.length > 10 && !l.startsWith("[") && !l.startsWith("]"));
+
       healthData = {
-        healthScore: 7,
-        observations: lines.length > 0 ? lines : ["AI provided a text-based analysis."],
+        healthScore: score,
+        confidence: "low",
+        reasoning: "Could not fully parse AI response. Showing extracted insights.",
+        observations: lines.slice(0, 4),
         warnings: [],
-        recommendations: [],
-        hydrationStatus: "unknown",
-        weightStatus: "unknown",
+        recommendations: ["Log more care data for better AI analysis", "Consult a vet for professional assessment"],
       };
     }
 
     return NextResponse.json({
       healthScore: typeof healthData.healthScore === "number" ? Math.min(10, Math.max(1, healthData.healthScore)) : 5,
       confidence: healthData.confidence || "medium",
-      reasoning: typeof healthData.reasoning === "string" ? healthData.reasoning.replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "") : null,
+      reasoning: typeof healthData.reasoning === "string" && healthData.reasoning.length < 200 && !healthData.reasoning.includes("{") ? healthData.reasoning.replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "") : null,
       observations: Array.isArray(healthData.observations) ? healthData.observations.map((o: unknown) => String(o).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],
       warnings: Array.isArray(healthData.warnings) ? healthData.warnings.map((w: unknown) => String(w).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],
       recommendations: Array.isArray(healthData.recommendations) ? healthData.recommendations.map((r: unknown) => String(r).replace(/\*\*/g, "").replace(/\*/g, "").replace(/`/g, "")) : [],

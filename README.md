@@ -74,18 +74,20 @@ PawPort gives every cat a **QR code + 6-digit PIN** that instantly connects find
 ---
 
 ## 📊 Architecture
+
+```text
 ┌─────────────────────────────────────────────────┐
 │         Browser / Mobile Camera                  │
 │  (Scan QR → View Public Profile → Share GPS)    │
 └────────────┬────────────────────────────────────┘
-│
-↓
+             │
+             ↓
 ┌─────────────────────────────────────────────────┐
 │       Next.js Frontend (Tailwind CSS)            │
 │  Dashboard | Registration | Public Profile      │
 └────────────┬────────────────────────────────────┘
-│
-↓
+             │
+             ↓
 ┌─────────────────────────────────────────────────┐
 │     Next.js API Routes (TypeScript)             │
 │  /api/cats - CRUD operations                    │
@@ -94,44 +96,40 @@ PawPort gives every cat a **QR code + 6-digit PIN** that instantly connects find
 │  /api/cats/[id]/sighting - GPS submissions      │
 │  /api/auth - Session management                 │
 └────────────┬────────────────────────────────────┘
-│
-┌──────┴──────────┬──────────────┐
-↓                 ↓              ↓
+             │
+      ┌──────┴──────────┬──────────────┐
+      ↓                 ↓              ↓
 ┌──────────────┐  ┌──────────────┐ ┌──────────────┐
 │   SQLite     │  │ OpenRouter   │ │   Resend     │
 │   Database   │  │   API (AI)   │ │   (Email)    │
-│ (Prisma ORM)│  │              │ │              │
+│ (Prisma ORM) │  │              │ │              │
 └──────────────┘  └──────────────┘ └──────────────┘
-Temporal Workflows (Separate Process):
-┌──────────────────────────────────────┐
-│  Temporal Server (localhost:7233)    │
-│  - Lost cat escalation (24h loop)    │
-│  - Medication reminders              │
-│  - Feeding reminders                 │
-└──────────────────────────────────────┘
+```
+
+Temporal Workflows run separately for lost cat escalation and reminders.
+
 ---
 
 ## 🔐 Security
 
 ### Implemented
-✅ **Rate Limiting** — 5 login attempts per IP per 15 minutes (429 status)  
-✅ **Content Security Policy** — restricts inline scripts, external resources  
-✅ **Input Validation** — all form fields sanitized, length limits enforced  
+✅ **Rate Limiting** — 5 login attempts per IP per 15 minutes  
+✅ **Content Security Policy** — restricts inline scripts and external resources  
+✅ **Input Validation** — all form fields sanitized with length limits  
 ✅ **SQL Injection Prevention** — Prisma parameterized queries only  
-✅ **Secure Cookies** — httpOnly, secure, sameSite flags set  
+✅ **Secure Cookies** — httpOnly, secure, sameSite flags  
 ✅ **Password Hashing** — bcryptjs with salt rounds  
 ✅ **API Key Protection** — OpenRouter key never exposed to client  
-✅ **CORS Protection** — API routes validate origin  
-✅ **No Sensitive Data in Responses** — passwords, API keys never returned  
+✅ **File Upload Sanitization** — filenames sanitized to prevent directory traversal
 
 ### Responsible AI
-✅ **AI Disclaimers** — Every AI response states "NOT a medical diagnosis"  
-✅ **Confidence Scoring** — Health check shows confidence level based on data completeness  
-✅ **Transparency** — Shows what data was used ("3 care logs, 2 vaccinations, weight recorded")  
+✅ **AI Disclaimers** — Every response states "NOT a medical diagnosis"  
+✅ **Confidence Scoring** — Health check shows confidence based on data  
+✅ **Transparency** — Shows what data was analyzed  
 ✅ **Human Oversight** — "Report inaccurate" button on all AI results  
-✅ **No Autonomous Decisions** — All AI outputs are recommendations only  
+✅ **No Autonomous Decisions** — All AI outputs are recommendations only
 
-See `SECURITY.md` for detailed security audit.
+See `SECURITY.md` for detailed audit.
 
 ---
 
@@ -140,56 +138,51 @@ See `SECURITY.md` for detailed security audit.
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- SQLite3
 
 ### Local Development
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/Mikomijie/pawport.git
 cd pawport
 ```
 
 2. **Install dependencies:**
+
 ```bash
 npm install
 ```
 
 3. **Set up environment variables:**
+
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env`:
+
+```env
 DATABASE_URL="file:./dev.db"
 AUTH_SECRET="your-random-secret-string-here"
-OPENROUTER_API_KEY="sk-or-your-key-from-openrouter.ai"
-RESEND_API_KEY="re_your-key-from-resend.com"
-TEMPORAL_ADDRESS="localhost:7233"
+OPENROUTER_API_KEY="sk-or-your-key"
+RESEND_API_KEY="re_your-key"
+```
+
 4. **Initialize database:**
+
 ```bash
 npx prisma db push
 npx prisma generate
 ```
 
 5. **Start development server:**
+
 ```bash
 npm run dev
 ```
 
 Visit `http://localhost:3000`
-
-### Optional: Run Temporal Workflows
-
-In separate terminals:
-
-```bash
-# Terminal 1: Start Temporal server
-temporal server start-dev
-
-# Terminal 2: Start Temporal worker
-npx ts-node --project tsconfig.worker.json temporal/worker.ts
-```
 
 ---
 
@@ -197,81 +190,65 @@ npx ts-node --project tsconfig.worker.json temporal/worker.ts
 
 ### As a Cat Owner
 
-1. **Register** — Create account with email and password
-2. **Add cat** — Upload photo, enter breed, gender, age, weight, health info
-3. **Get QR code** — Download or print from dashboard
-4. **Attach to collar** — Print the QR code or write 6-digit PIN on collar tag
-5. **Monitor health** — Log care events (feeding, water, medication)
-6. **Get insights** — Click "AI Health Check" for confidence-scored analysis
-7. **If lost** — Click "Mark as Lost" on the cat card
-8. **Get notified** — When someone finds your cat and submits GPS, you get an email
+1. Register with email and password
+2. Add your cat with photo, breed, health info
+3. Get QR code and PIN from dashboard
+4. Attach QR code or write PIN on collar
+5. Log care events (feeding, water, medication)
+6. Get AI health insights
+7. If lost, mark as lost and get notified when found
 
 ### As a Finder
 
-1. **Scan QR code** with phone camera, or go to pawport.com and enter PIN
-2. **View profile** — See cat name, breed, owner contact, special care needs
-3. **Share location** — Click "I Found This Cat" and allow GPS access
-4. **Send message** — (Optional) Leave a note for the owner
-5. **Owner gets notified** — Within seconds, owner receives email with your location
+1. Scan QR code or enter PIN at pawport.com
+2. View cat profile and owner contact
+3. Click "I Found This Cat"
+4. Share your GPS location
+5. Owner receives instant email
 
 ---
 
-## 🎬 Demo Video
+## 🏆 Judging Criteria
 
-[Link to demo video showing full workflow]
-
----
-
-## 🏆 Judging Criteria Coverage
-
-| Criteria | Score | Implementation |
-|----------|-------|-----------------|
-| **Technical Execution (25%)** | ✅ | Next.js fullstack, Prisma, Temporal workflows, OpenRouter AI integration, email notifications |
-| **Innovation & Creativity (20%)** | ✅ | AI health transparency with confidence scoring, GPS sighting system, privacy controls, AI chat & timeline |
-| **Theme Relevance (15%)** | ✅ | Directly solves cat safety problem with QR code identification & health sharing |
-| **Security (15%)** | ✅ | Rate limiting, CSP headers, input validation, secure auth, responsible AI design |
-| **UX/UI (15%)** | ✅ | Mobile-first design, Playfair Display typography, terracotta color system, smooth interactions |
-| **Documentation (10%)** | ✅ | README, SECURITY.md, inline code comments, architecture diagrams |
+| Criteria | Implementation |
+|----------|----------------|
+| **Technical (25%)** | Next.js fullstack, Prisma, Temporal, OpenRouter AI, email |
+| **Innovation (20%)** | AI transparency, GPS sighting, privacy controls, AI chat |
+| **Theme (15%)** | Solves cat safety with QR code identification |
+| **Security (15%)** | Rate limiting, CSP, input validation, responsible AI |
+| **UX/UI (15%)** | Mobile-first, Playfair typography, terracotta design |
+| **Documentation (10%)** | README, SECURITY.md, architecture diagrams |
 
 ---
 
 ## 📝 Project Structure
+
+```text
 pawport/
 ├── app/
 │   ├── page.tsx                 # Landing page
 │   ├── layout.tsx               # Root layout
-│   ├── (auth)/
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   ├── dashboard/
-│   │   ├── page.tsx             # Owner dashboard
-│   │   ├── cat-card.tsx         # Cat card component
-│   │   ├── register-cat-form.tsx
-│   │   └── privacy-settings.tsx
-│   ├── cat/[id]/
-│   │   ├── page.tsx             # Public profile (for finders)
-│   │   └── found-cat-button.tsx
-│   ├── find/page.tsx            # PIN lookup page
-│   └── api/
-│       ├── auth/                # Auth endpoints
-│       ├── cats/                # Cat CRUD
-│       └── cats/[id]/           # Health check, chat, sighting, care log
+│   ├── (auth)/login/page.tsx
+│   ├── (auth)/register/page.tsx
+│   ├── dashboard/page.tsx       # Owner dashboard
+│   ├── cat/[id]/page.tsx        # Public profile
+│   ├── find/page.tsx            # PIN lookup
+│   └── api/                     # API routes
 ├── lib/
-│   ├── db.ts                    # Database client
-│   ├── auth.ts                  # Session management
-│   ├── validations.ts           # Input validators
-│   ├── pin.ts                   # PIN generation
-│   └── rate-limit.ts            # Rate limiting
+│   ├── db.ts
+│   ├── auth.ts
+│   ├── validations.ts
+│   └── rate-limit.ts
 ├── prisma/
-│   └── schema.prisma            # Database schema
+│   └── schema.prisma
 ├── temporal/
-│   ├── workflows.ts             # Workflow definitions
-│   ├── activities.ts            # Activity implementations
-│   └── worker.ts                # Worker setup
-├── public/
-│   └── uploads/                 # User uploaded photos
-├── .env                         # Environment variables
-└── README.md                    # This file
+│   ├── workflows.ts
+│   ├── activities.ts
+│   └── worker.ts
+├── public/uploads/              # User photos
+└── README.md
+```
+
 ---
 
 ## 🚀 Deployment
@@ -279,30 +256,16 @@ pawport/
 ### Deploy to Vercel
 
 1. Push to GitHub
-2. Go to [vercel.com/new](https://vercel.com/new)
+2. Go to <https://vercel.com/new>
 3. Import `github.com/Mikomijie/pawport`
-4. Add environment variables in Vercel dashboard
+4. Add environment variables
 5. Deploy
-
-The app will be live at `pawport.vercel.app`
-
----
-
-## 🤝 Contributing
-
-This is a hackathon project. For improvements:
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/improvement`)
-3. Commit changes (`git commit -m 'Add improvement'`)
-4. Push to branch (`git push origin feature/improvement`)
-5. Open Pull Request
 
 ---
 
 ## 📄 License
 
-MIT License — See LICENSE file for details
+MIT License
 
 ---
 
@@ -319,18 +282,10 @@ GitHub: [@Mikomijie](https://github.com/Mikomijie)
 - **Temporal** — Workflow orchestration
 - **OpenRouter** — AI API integration
 - **Resend** — Email delivery
-- **Vercel** — Hosting & deployment
+- **Vercel** — Hosting
 - **Anthropic** — Claude AI assistance
 
 ---
 
-## 📞 Support
-
-For issues or questions:
-- Open an issue on [GitHub](https://github.com/Mikomijie/pawport/issues)
-- Check [SECURITY.md](SECURITY.md) for security questions
-
----
-
-**Last Updated:** June 30, 2026  
-**Status:** Hackathon Submission Ready
+**Status:** Hackathon Submission Ready  
+**Last Updated:** June 30, 2026
